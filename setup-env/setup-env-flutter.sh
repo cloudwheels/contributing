@@ -3,6 +3,16 @@
 # To run from the command line (from home directory)…
 # source <(curl -s https://raw.githubusercontent.com/cloudwheels/contributing/master/setup-env/setup-env-flutter.sh)
 #
+#
+# Should run in home diretory
+# See about gettng current directory here
+#
+# https://stackoverflow.com/questions/59895/get-the-source-directory-of-a-bash-script-from-within-the-script-itself
+# (e.g. answer): https://stackoverflow.com/a/246128/10797095
+#
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+echo This script is being run from $DIR
+#
 # CHROMEBOOK CROSTINI DEV ENV SETUP SCRIPT (FLUTTER DEV)
 #
 #
@@ -27,7 +37,8 @@ sudo apt-get update
 sudo apt-get install code -y
 #
 # TODO: set up extensions & import projects from git etc
-#
+echo “installing vscode extension for dart + flutter”
+code --install-extension Dart-Code.flutter
 #
 # SET UP FLUTTER DEV ENV
 #
@@ -72,6 +83,9 @@ sudo apt install default-jdk -y
 #
 echo “installing Android”
 #
+# prerequisites
+sudo apt install lib32ncurses5 lib32stdc++6 -y
+#
 # TODO: How to get the latest version number?
 curl https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -L -o sdk-tools-linux
 unzip ~/sdk-tools-linux
@@ -80,19 +94,20 @@ printf '\nexport PATH=\"$PATH:~/tools/bin\"\n' >> ~/.bashrc
 # source ~/.bashrc
 ## TODO: CHECK / GET LATESET VERSIONS!!!!
 echo “installing Android platform tools - REQUIRES ACCEPTING LICENSES!!!”
-sdkmanager "build-tools;28.0.3" "emulator" "tools" "platform-tools" "platforms;android-28" "extras;google;google_play_services" "extras;google;webdriver" "system-images;android-28;google_apis_playstore;x86_64"
+## UNTESTED - SILENTLY ACCEPT ANDROID LICENCES
+yes | ./tools/bin/sdkmanager --licenses
+./tools/bin/sdkmanager "build-tools;28.0.3" "emulator" "tools" "platform-tools" "platforms;android-28" "extras;google;google_play_services" "extras;google;webdriver" "system-images;android-28;google_apis_playstore;x86_64"
 printf '\nexport PATH=\"$PATH:~/platform-tools\"\n' >> ~/.bashrc
 printf '\nexport ANDROID_HOME=\"~"\n' >> ~/.bashrc
 # source ~/.bashrc
 # set android home in flutter config 
 ./flutter/bin/flutter config --android-sdk ~
 echo “running flutter doctor - YOU MUST ACCEPT ANDROID LICENCES”
-./flutter/bin/flutter doctor --android-licenses
+yes | ./flutter/bin/flutter doctor --android-licenses
 #
-echo “installing vscode extension for dart + flutter”
-code --install-extension Dart-Code.flutter
 #
 echo “running flutter doctor to make sure all is cool….”
 ./flutter/bin/flutter doctor -v
 #
-echo “THE END”
+echo “DONE - RELOADING SHELL TO MAKE ENV VARIABLES AVAILABLE”
+exec bash
